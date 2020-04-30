@@ -1,168 +1,200 @@
-import sys
-import os
+import tkinter as tk
+import queue
+import threading
+import time
+import random as rand
+from Board import Board
 
-class Board:
+HEIGHT= 400
+WIDTH = 400
+GUI_COLOR='#5584B4'
+def uaktualnij_statystyki():
+    print("a")
 
-    def __init__ (self,size):
-        self.size=size
-        self.tiles = [["." for col in range(size)] for row in range(size)]
+class GuiPart:
+    def __init__(self, root, mainQueue, endCommand):
+        self.queue=mainQueue
+        self.root=root
+        #defining always visible elements of GUI
+        canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
+        canvas.pack()
 
-    def printBoard(self):
-        print()
-        for row in range (0,self.size):
-            for col in range (0,self.size):
-                print(self.tiles[row][col], end=' ')
-            print()
-        print()
+        self.guiFrame = tk.Frame(root, bg=GUI_COLOR, bd=5)
+        self.guiFrame.place(anchor='n', rely=0, relx=0.5, relwidth=1, relheight=1)
 
-    def changeTile(self,row, col, value):
-        row=row-1
-        col=col-1
-        if self.tiles[row][col]!=".":
-            print("To miejsce jest juz zajete!")
-            return None
-        self.tiles[row][col] = value
-        print("Zmienione!")
-        return True
+        nameLabel = tk.Label(self.guiFrame, font=40, text='KÓŁKO I KRZYŻYK!', bg=GUI_COLOR)
+        nameLabel.place(rely=0.1, relx=0, relwidth=1, relheight=0.1)
 
-    def checkIfFull(self):
-        for row in range (0,self.size):
-            for col in range (0,self.size):
-                if self.tiles[col][row]==".":
-                    return False
-        return True
+        #defining menu interface
+        self.menuFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
+        startButton = tk.Button(self.menuFrame, text='Nowa gra',
+                                command=lambda: self.changeScreen(self.menuFrame, self.selectionFrame))
+        startButton.place(rely=0.2, relx=0.1, relwidth=0.8, relheight=0.15)
 
-    def checkIfWin(self):
-        for row in range (0,self.size):
-            for col in range (0,self.size):
+        statisticsButton = tk.Button(self.menuFrame, text='Statystyki')
+        statisticsButton.place(rely=0.45, relx=0.1, relwidth=0.8, relheight=0.15)
 
-                #check if empty
-                if self.tiles[col][row]==".":
-                    continue
+        endButton = tk.Button(self.menuFrame, text="Wyjdź", command=lambda: endCommand())
+        endButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
 
-                #check horizontal
-                if col>=1 and col <= self.size-2:
-                    if self.tiles[col][row] == self.tiles[col-1][row] \
-                            and self.tiles[col][row] == self.tiles[col+1][row] :
-                        return (True,self.tiles[col][row])
+        #defining game choosing interface
+        self.selectionFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
+        normalGameButton = tk.Button(self.selectionFrame, text='Gra w 2 osoby', command=lambda: self.newGame())
+        normalGameButton.place(rely=0.2, relx=0.1, relwidth=0.8, relheight=0.15)
 
-                    #diagnal check
-                    if row >= 1 and row <= self.size - 2:
-                        if self.tiles[col][row] == self.tiles[col - 1][row-1] \
-                                and self.tiles[col][row] ==self.tiles[col + 1][row+1]:
-                            return (True,self.tiles[col][row])
-                        if self.tiles[col][row] == self.tiles[col - 1][row+1] \
-                                and self.tiles[col][row] ==self.tiles[col + 1][row-1]:
-                            return (True,self.tiles[col][row])
+        computerGameButton = tk.Button(self.selectionFrame, text='Gra z komputerem')
+        computerGameButton.place(rely=0.45, relx=0.1, relwidth=0.8, relheight=0.15)
 
-                #check vertical
-                if row >= 1 and row <= self.size - 2:
-                    if self.tiles[col][row] == self.tiles[col][row-1] \
-                            and self.tiles[col][row] == self.tiles[col][row+1] :
-                        return (True,self.tiles[col][row])
-        return (False,None)
+        menuButton = tk.Button(self.selectionFrame, text="Powrót do menu głównego",
+                               command=lambda: self.changeScreen(self.selectionFrame, self.menuFrame) )
+        menuButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
+        # next commands can be descibed also like:
+        # rows3 = tk.Button(self.selectionFrame,text="3", command=lambda: self.changeRows(3))
+        # rows3.place(rely=0, relx=0.1, relwidth=0.2, relheight=0.1)
+        #
+        # rows4 = tk.Button(self.selectionFrame, text="4", command=lambda: self.changeRows(4))
+        # rows4.place(rely=0, relx=0.4, relwidth=0.2, relheight=0.1)
+        #
+        # rows5 = tk.Button(self.selectionFrame, text="5", command=lambda: self.changeRows(5))
+        # rows5.place(rely=0, relx=0.7, relwidth=0.2, relheight=0.1)
+        #
+        # #creating 3 buttons to change grid size
+        # self.rowButtons=[rows3, rows4, rows5]
 
-def intInput():
-    try:
-        x=int(input())
-    except ValueError:
-        print("Prosze wprowadzic liczbe!")
-        return None
-    except EOFError:
-        print("Prosze wprowadzic liczbe!")
-        return None
-    return x
+        self.rowButtons=list(map(lambda x: tk.Button( self.selectionFrame,text=str(x),
+                                                      command=lambda: self.changeSize(x)),range (3, 6)))
+        for i in range (3):
+            self.rowButtons[i].place(rely=0, relx=0.1+0.3*i, relwidth=0.2, relheight=0.1)
 
+        self.menuFrame.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.7)
+        self.changeSize(3)
 
-def newGame(size):
-    os.system("cls")
-    print("Zaczeto nowa gre rozmiaru " + str(size))
-    board=Board(size)
-    run = True
-    sides={0: "Krzyzyk", 1: "Kolko"}
-    values={0: "X", 1: "O"}
-    side=0
-    while run:
-        board.printBoard()
-        results = board.checkIfWin()
-        if results[0]:
-            print("Wygral zawodnik grajacy "+ results[1])
-            #print("Wpisz cokolwiek, by powrocic do menu glownego!")
-            #input()
-            return
-        if board.checkIfFull() :
-            print("Remis!")
-            #print("Wpisz cokolwiek, by powrocic do menu glownego!")
-            #input()
-            return
+    def changeScreen(self, oldScreen, newScreen):
+        oldScreen.place_forget()
+        newScreen.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.7)
 
-        print("Teraz gra "+sides[side])
-        print("Prosze wybrac rzad, w ktorym chcesz umiescic " +
-              sides[side] + "(1-"+ str(size)+"), inna liczba zakonczy gre.")
-        row=intInput()
-        if row==None:
-            return
+    def changeSize(self, n):
+        self.size=n
+        for i in range (3):
+            self.rowButtons[i]["bg"]="white"
+        self.rowButtons[n-3]["bg"]="red"
 
-        if row<=size and row>=1:
-            print("Prosze wybrac kolumne, w ktorym chcesz umiescic " +
-                  sides[side] + "(1-"+ str(size)+"), inna liczba zakonczy gre.")
-            col = intInput()
-            if col == None:
-                return
-            if col<=size and col>=1:
-                output=board.changeTile(row, col, values[side])
-                if output==True:
-                    side=(side+1)%2
-                continue
-        run=False
+    def newGame(self):
+        self.gameFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
+        self.board = Board(self.size)
 
-def printTUI():
-    #print choises
-    print("Prosze wpisac numer polecenia, ktore chcesz wykonac:")
-    print("  1. Nowa gra")
-    print("  2. Statystyki")
-    print("  3. Zakoncz")
+        self.gameButtons = list(map(lambda y: list(map(lambda x: tk.Button(self.gameFrame,
+                                            command=lambda: self.gameButtonClicked(y,x)), range(self.size))), range(self.size)))
+        for i in range(self.size):
+            for j in range(self.size):
+                self.gameButtons[i][j].place(rely=(1/self.size)*i, relx=(1/self.size)*j, relwidth=(1/self.size),
+                                             relheight=(1/self.size))
+        self.changeScreen(self.selectionFrame, self.gameFrame)
+
+    def gameButtonClicked(self, row, col):
+        self.board.changeTile(row, col)
+        self.gameButtons[row][col]["text"]=self.board.getValue(row,col)
+        if self.board.checkIfWin():
+            self.board.swapPlayer()
+            self.endOfGame("Wygrał " + self.board.player + "\n Powrót do menu głównego")
+        if self.board.checkIfFull():
+            self.endOfGame("Remis! \n Powrót do menu głównego")
 
 
 
-def main():
-    run=True
+    def endOfGame(self, text):
+        for i in range(self.size):
+            for j in range(self.size):
+                self.gameButtons[i][j].config(command=lambda: None)
 
-    #run program while user wants to play a game
-    while run:
-        #os.system("cls")
+        returnButton = tk.Button(self.gameFrame, text=text, bg='#A4B691', command=lambda: self.backToMenu())
+        returnButton.place(rely=0.2, relx=0.2, relwidth=0.6, relheight=0.3)
 
-        printTUI()
+    def backToMenu(self):
+        self.changeScreen(self.gameFrame, self.menuFrame)
+        self.gameFrame.destroy()
 
-        # get choise
-        x = intInput()
-        if x == None:
-            continue
 
-        # new game
-        if (x == 1):
-            print("Na planszy jakiego rozmiaru od 3 do 5 chcesz zagrac?")
-            print("Wpis dowolna inna liczbe aby powrocic do menu glownego.")
-            x = intInput()
-            if x == None:
-                continue
-            # play a game if x is 3,4 or 5
-            if x >= 3 and x <= 5:
-                newGame(x)
-            continue
+    def processIncoming(self):
+        while self.queue.qsize(  ):
+            try:
+                msg = self.queue.get(0)
+                print(msg)
+            except queue.Empty:
+                pass
 
-        # statistics
-        elif x == 2:
-            print("Statystyki")
-            continue
-        # end program
-        elif x == 3:
-            print("Koniec")
-            run=False
-            break
 
-        # wrong choice
-        print("Wprowadzono niepoprawna liczbe")
-        continue
-    return
-main()
+
+class ThreadedClient:
+    """
+    Launch the main part of the GUI and the worker thread. periodicCall and
+    endApplication could reside in the GUI part, but putting them here
+    means that you have all the thread controls in a single place.
+    """
+
+    def __init__ (self, master):
+        """
+        Start the GUI and the asynchronous threads. We are in the main
+        (original) thread of the application, which will later be used by
+        the GUI as well. We spawn a new thread for the worker (I/O).
+        """
+        self.master = master
+
+        # Create the queue
+        self.queue = queue.Queue(  )
+
+        # Set up the GUI part
+        self.gui = GuiPart(master, self.queue, self.endApplication)
+
+        # Set up the thread to do asynchronous I/O
+        # More threads can also be created and used, if necessary
+        self.running = 1
+        # self.thread1 = threading.Thread(target=self.workerThread1)
+        # self.thread1.start(  )
+
+        # Start the periodic call in the GUI to check if the queue contains
+        # anything
+        # self.periodicCall(  )
+
+    def periodicCall(self):
+        """
+        Check every 200 ms if there is something new in the queue.
+        """
+        self.gui.processIncoming(  )
+        if not self.running:
+            # This is the brutal stop of the system. You may want to do
+            # some cleanup before actually shutting it down.
+            import sys
+            sys.exit(1)
+        self.master.after(200, self.periodicCall)
+
+    def workerThread1(self):
+        """
+        This is where we handle the asynchronous I/O. For example, it may be
+        a 'select(  )'. One important thing to remember is that the thread has
+        to yield control pretty regularly, by select or otherwise.
+        """
+        while self.running:
+            # To simulate asynchronous I/O, we create a random number at
+            # random intervals. Replace the following two lines with the real
+            # thing.
+            time.sleep(rand.random(  ) * 1.5)
+            # msg = rand.random(  )
+            # self.queue.put(msg)
+
+    def endApplication(self):
+        self.running = 0
+
+
+root=tk.Tk()
+
+client= ThreadedClient(root)
+root.mainloop()
+
+# background_image = tk.PhotoImage(file='./hindus.png')
+# background_label = tk.Label(root, image=background_image)
+# background_label.place(relwidth=1, relheight=1)
+#
+# entry=tk.Entry(frame)
+# entry.place(relwidth=0.65, relheight=1)
+
