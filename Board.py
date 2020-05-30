@@ -4,6 +4,7 @@ class Board:
         self.size=size
         self.tiles = [["." for col in range(size)] for row in range(size)]
         self.player='X'
+        self.numToWin=size if size==3 else 4
 
     def printBoard(self):
         print()
@@ -31,7 +32,7 @@ class Board:
     def checkIfFull(self):
         for row in range (0,self.size):
             for col in range (0,self.size):
-                if self.tiles[row][col]==".":
+                if self.tiles[row][col] == ".":
                     return False
         return True
 
@@ -39,31 +40,45 @@ class Board:
         return self.tiles[row][col]
 
     def checkIfWin(self):
-        for row in range (0,self.size):
-            for col in range (0,self.size):
+        #check vertical
+        value = False
+        for col in range (0, self.size):
+            value = value or self.checkLine(0,col,1,0,self.size)
 
-                #check if empty
-                if self.tiles[col][row]==".":
-                    continue
+        # check horizontal
+        for row in range (0, self.size):
+            value = value or self.checkLine(row,0,0,1, self.size)
 
-                #check horizontal
-                if col>=1 and col <= self.size-2:
-                    if self.tiles[col][row] == self.tiles[col-1][row] \
-                            and self.tiles[col][row] == self.tiles[col+1][row] :
-                        return True
+        #check diagonal from left to right
+        for move in range (0, self.size - self.numToWin + 1):
+            #transpose right
+            value = value or self.checkLine(0,move,1,1,self.size - move)
+            #transpose down
+            value = value or self.checkLine(move, 0, 1, 1, self.size - move)
 
-                    #diagnal check
-                    if row >= 1 and row <= self.size - 2:
-                        if self.tiles[col][row] == self.tiles[col - 1][row-1] \
-                                and self.tiles[col][row] ==self.tiles[col + 1][row+1]:
-                            return True
-                        if self.tiles[col][row] == self.tiles[col - 1][row+1] \
-                                and self.tiles[col][row] ==self.tiles[col + 1][row-1]:
-                            return True
+        # check diagonal from left to right
+        for move in range(0, self.size - self.numToWin + 1):
+            # transpose right
+            value = value or self.checkLine(0, self.size - 1 - move, 1, -1, self.size - move)
+            # transpose down
+            value = value or self.checkLine(move, self.size - 1, 1, -1, self.size - move)
+            
+        return value
 
-                #check vertical
-                if row >= 1 and row <= self.size - 2:
-                    if self.tiles[col][row] == self.tiles[col][row-1] \
-                            and self.tiles[col][row] == self.tiles[col][row+1] :
-                        return True
+
+    def checkLine(self, startRow, startCol, moveRow, moveCol, numOfElem):
+        counter = 0
+        countedSymbol = self.tiles[startRow][startCol]
+        for elem in range(0, numOfElem):
+            # print(startRow + elem * moveRow, startCol + elem * moveCol)
+            currentSymbol = self.tiles[startRow + elem * moveRow][startCol + elem * moveCol]
+            if currentSymbol == ".":
+                counter = 0
+            elif currentSymbol == countedSymbol:
+                counter += 1
+                if counter == self.numToWin:
+                    return True
+            else:
+                counter = 1
+                countedSymbol = currentSymbol
         return False
