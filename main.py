@@ -99,6 +99,19 @@ class Board:
             undone_moves.pop(-1)
         return
 
+    def undo_all_moves(self, moves, undone_moves):
+        try:
+            undo_all_coordinates = moves[-1]
+        except IndexError:
+            print("Już jesteś na początku gry!")
+        else:
+            for i in range(len(moves)):
+                undo_all_coordinates = moves[-1]
+                undo_all_row, undo_all_col, undo_all_side = undo_all_coordinates
+                self.tiles[undo_all_row - 1][undo_all_col - 1] = "."
+                moves.pop(-1)
+                undone_moves.append(undo_all_coordinates)
+        return
 
 def intInput():
     try:
