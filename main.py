@@ -147,6 +147,7 @@ def intInput():
 def newGame(size):
     os.system("cls")
     print("Zaczeto nowa gre rozmiaru " + str(size))
+    start_time = time.time()
     board=Board(size)
     run = True
     sides={0: "Krzyzyk", 1: "Kolko"}
@@ -159,12 +160,16 @@ def newGame(size):
         board.printBoard()
         results = board.checkIfWin()
         if results[0]:
-            print("Wygral zawodnik grajacy "+ results[1])
+            end_time = time.time()
+            game_time = int(end_time - start_time)
+            print("Wygral zawodnik grajacy " + results[1] + ". Gra trwała", game_time, "sekund.")
             #print("Wpisz cokolwiek, by powrocic do menu glownego!")
             #input()
             return
         if board.checkIfFull() :
-            print("Remis!")
+            end_time = time.time()
+            game_time = int(end_time - start_time)
+            print("Remis! Gra trwała", game_time, "sekund.")
             #print("Wpisz cokolwiek, by powrocic do menu glownego!")
             #input()
             return
