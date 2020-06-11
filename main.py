@@ -3,9 +3,6 @@ import os
 
 class Board:
 
-
-
-
     def __init__ (self,size):
         self.size=size
         self.tiles = [["." for col in range(size)] for row in range(size)]
@@ -111,7 +108,29 @@ class Board:
                 self.tiles[undo_all_row - 1][undo_all_col - 1] = "."
                 moves.pop(-1)
                 undone_moves.append(undo_all_coordinates)
+
         return
+
+    def repeat_all_moves(self, moves, values, undone_moves):
+        try:
+            repeat_all_coordinates = undone_moves[-1]
+        except IndexError:
+            print("Wszystkie ruchy zostały już przywrócone!")
+        else:
+            for i in range(len(undone_moves)):
+                repeat_all_coordinates = undone_moves[-1]
+                repeat_all_row, repeat_all_col, repeat_all_side = repeat_all_coordinates
+
+                if repeat_all_side == 0:
+                    repeat_all_side = 1
+                else:
+                    repeat_all_side = 0
+
+                self.tiles[repeat_all_row - 1][repeat_all_col - 1] = values[repeat_all_side]
+                undone_moves.pop(-1)
+                moves.append(repeat_all_coordinates)
+        return
+
 
 def intInput():
     try:
@@ -151,8 +170,12 @@ def newGame(size):
             return
 
         print("Teraz gra "+sides[side])
-        print("Prosze wybrac rzad, w ktorym chcesz umiescic " +
-              sides[side] + "(1-"+ str(size)+"), lub 6 jeżeli chcesz cofnąć ruch lub 7 by go przywrócić. Inna liczba zakończy grę.")
+        print("Prosze wybrac rzad, w ktorym chcesz umiescic " + sides[side] + "(1-"+ str(size)+"), lub:")
+        print(" 6 jeżeli chcesz cofnąć ruch")
+        print(" 7 by go przywrócić")
+        print(" 8 by cofnąć wszystkie ruchy")
+        print(" 9 by przywrócić wszystkie cofnięte ruchy.")
+        print("Inna liczba zakończy grę.")
 
 
 
@@ -163,11 +186,18 @@ def newGame(size):
         if row == 6:
             board.undo_move(moves, undone_moves)
             continue
+
         if row == 7:
             board.repeat_move(undone_moves, values, moves)
             continue
 
+        if row == 8:
+            board.undo_all_moves(moves, undone_moves)
+            continue
 
+        if row == 9:
+            board.repeat_all_moves(moves, values, undone_moves)
+            continue
 
         if row<=size and row>=1:
             print("Prosze wybrac kolumne, w ktorej chcesz umiescic " +
@@ -217,7 +247,7 @@ def main():
         # new game
         if (x == 1):
             print("Na planszy jakiego rozmiaru od 3 do 5 chcesz zagrac?")
-            print("Wpis dowolna inna liczbe aby powrocic do menu glownego.")
+            print("Wpisz dowolna inna liczbe aby powrocic do menu glownego.")
             x = intInput()
             if x == None:
                 continue
