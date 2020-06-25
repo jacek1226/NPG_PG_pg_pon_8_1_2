@@ -136,22 +136,22 @@ class GuiPart:
         return False
 
     def gameButtonClicked(self, row, col):
-        self.board.changeTile(row, col)
-        self.updateCellText(row,col)
-        if self.checkEndGame():
-            return
+        if self.board.changeTile(row, col):
+            self.updateCellText(row,col)
+            if self.checkEndGame():
+                return
 
-        if self.withAI:
-            if self.AIType=="hard":
-                self.AIPlayer.makeMove()
-                self.updateAllCellsText()
-                self.checkEndGame()
-                return
-            if self.AIType=="easy":
-                self.AIPlayer.makeRandomMove()
-                self.updateAllCellsText()
-                self.checkEndGame()
-                return
+            if self.withAI:
+                if self.AIType=="hard":
+                    self.AIPlayer.makeMove()
+                    self.updateAllCellsText()
+                    self.checkEndGame()
+                    return
+                if self.AIType=="easy":
+                    self.AIPlayer.makeRandomMove()
+                    self.updateAllCellsText()
+                    self.checkEndGame()
+                    return
 
 
 
