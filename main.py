@@ -98,11 +98,11 @@ class GuiPart:
         self.moveToStartButton.place(rely=0.92, relx=0, relwidth=0.2, relheight=0.06)
 
         self.moveBackButton = tk.Button(self.gameFrame, text="<",
-                                        command=lambda: [self.board.undo_move(), self.board.undo_move() if self.withAI else Null, self.updateAllCellsText()])
+                                        command=lambda: [self.board.undo_move(), self.board.undo_move() if self.withAI else 0, self.updateAllCellsText()])
         self.moveBackButton.place(rely=0.92, relx=0.25, relwidth=0.2, relheight=0.06)
 
         self.moveForwardButton = tk.Button(self.gameFrame, text=">",
-                                        command=lambda: [self.board.repeat_move(), self.board.repeat_move() if self.withAI else Null, self.updateAllCellsText()])
+                                        command=lambda: [self.board.repeat_move(), self.board.repeat_move() if self.withAI else 0, self.updateAllCellsText()])
         self.moveForwardButton.place(rely=0.92, relx=0.55, relwidth=0.2, relheight=0.06)
 
         self.moveToLastButton = tk.Button(self.gameFrame, text=">>",
