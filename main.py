@@ -164,7 +164,7 @@ class GuiPart:
         returnButton.place(rely=0.2, relx=0.2, relwidth=0.6, relheight=0.3)
 
     def backToMenu(self)-> None:
-        """Deletes the timer label after finished game."""
+        """Deletes the timer label."""
         
         self.changeScreen(self.gameFrame, self.menuFrame)
         self.gameFrame.destroy()
@@ -189,19 +189,31 @@ class GuiPart:
             self.timeUpdate()
             self._running = 1
 
-    def setTime(self, passed):
+    def setTime(self, passed)-> None:
+        """Converts the time from seconds to minutes:seconds:centyseconds format.
+
+        Parameters
+        ----------
+        passed : float
+        Time which passed since the begginig of the game in seconds.
+        """
+
         minutes = int(passed / 60)
         seconds = int(passed - minutes * 60.0)
         centy_seconds = int((passed - minutes * 60.0 - seconds) * 100)
         self.time_str.set('%02d:%02d:%02d' % (minutes, seconds, centy_seconds))
 
 
-    def timeUpdate(self):
+    def timeUpdate(self)-> None:
+        """Updates the time that passed."""
+
         self._time_passed = time.time() - self._start
         self.setTime(self._time_passed)
         self._timer = root.after(50, self.timeUpdate)
 
-    def stopTimer(self):
+    def stopTimer(self)-> None:
+        """Stops the timer."""
+        
         if self._running:
             root.after_cancel(self._timer)
             self._running = 0
