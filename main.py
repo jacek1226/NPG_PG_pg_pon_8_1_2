@@ -1,3 +1,4 @@
+
 import tkinter as tk
 import queue
 import threading
@@ -11,6 +12,79 @@ GUI_COLOR='#5584B4'
 def uaktualnij_statystyki():
     print("a")
 
+    #To class board
+    """ 
+    self.moves = []
+    self.undone_moves = []
+    def undo_move(self):
+        try:
+            undo_coordinates = self.moves[-1]
+        except IndexError:
+            print("Nie możesz już dalej cofnąć! Jesteś na początku gry!")
+        else:
+            undo_row, undo_col, undo_side = undo_coordinates
+            self.tiles[undo_row - 1][undo_col - 1] = "."
+            self.moves.pop(-1)
+            self.undone_moves.append(undo_coordinates)
+        return
+
+    def repeat_move(self, values):
+        try:
+            repeat_coordinates = self.undone_moves[-1]
+        except IndexError:
+            print("Nie ma już ruchów do przywrócenia!")
+        else:
+            repeat_row, repeat_col, repeat_side = repeat_coordinates
+            if repeat_side == 0:
+                repeat_side = 1
+            else:
+                repeat_side = 0
+
+            self.tiles[repeat_row - 1][repeat_col - 1] = values[repeat_side]
+
+            moves.append(repeat_coordinates)
+            for i in range (len(moves) - 1):
+                if moves[i] == repeat_coordinates:
+                    del moves[i]
+
+            undone_moves.pop(-1)
+        return
+
+    def undo_all_moves(self, moves, undone_moves):
+        try:
+            undo_all_coordinates = moves[-1]
+        except IndexError:
+            print("Już jesteś na początku gry!")
+        else:
+            for i in range(len(moves)):
+                undo_all_coordinates = moves[-1]
+                undo_all_row, undo_all_col, undo_all_side = undo_all_coordinates
+                self.tiles[undo_all_row - 1][undo_all_col - 1] = "."
+                moves.pop(-1)
+                undone_moves.append(undo_all_coordinates)
+
+        return
+
+    def repeat_all_moves(self, moves, values, undone_moves):
+        try:
+            repeat_all_coordinates = undone_moves[-1]
+        except IndexError:
+            print("Wszystkie ruchy zostały już przywrócone!")
+        else:
+            for i in range(len(undone_moves)):
+                repeat_all_coordinates = undone_moves[-1]
+                repeat_all_row, repeat_all_col, repeat_all_side = repeat_all_coordinates
+
+                if repeat_all_side == 0:
+                    repeat_all_side = 1
+                else:
+                    repeat_all_side = 0
+
+                self.tiles[repeat_all_row - 1][repeat_all_col - 1] = values[repeat_all_side]
+                undone_moves.pop(-1)
+                moves.append(repeat_all_coordinates)
+        return
+    """
 class GuiPart:
     def __init__(self, root, mainQueue, endCommand):
         self.queue=mainQueue
@@ -197,4 +271,3 @@ root.mainloop()
 #
 # entry=tk.Entry(frame)
 # entry.place(relwidth=0.65, relheight=1)
-
