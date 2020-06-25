@@ -2,6 +2,7 @@ import tkinter as tk
 import time
 import random as rand
 from Board import Board
+from AIPlayer import AIPlayer
 
 HEIGHT= 400
 WIDTH = 400
@@ -35,27 +36,15 @@ class GuiPart:
 
         #defining game choosing interface
         self.selectionFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
-        normalGameButton = tk.Button(self.selectionFrame, text='Gra w 2 osoby', command=lambda: [self.newGame(), self.StartTimer()])
+        normalGameButton = tk.Button(self.selectionFrame, text='Gra w 2 osoby', command=lambda: [self.newGame(False), self.StartTimer()])
         normalGameButton.place(rely=0.2, relx=0.1, relwidth=0.8, relheight=0.15)
 
-        computerGameButton = tk.Button(self.selectionFrame, text='Gra z komputerem')
+        computerGameButton = tk.Button(self.selectionFrame, text='Gra z komputerem', command=lambda: self.changeScreen(self.selectionFrame, self.AISelectionFrame))
         computerGameButton.place(rely=0.45, relx=0.1, relwidth=0.8, relheight=0.15)
 
         menuButton = tk.Button(self.selectionFrame, text="Powrót do menu głównego",
                                command=lambda: self.changeScreen(self.selectionFrame, self.menuFrame) )
         menuButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
-        # next commands can be descibed also like:
-        # rows3 = tk.Button(self.selectionFrame,text="3", command=lambda: self.changeRows(3))
-        # rows3.place(rely=0, relx=0.1, relwidth=0.2, relheight=0.1)
-        #
-        # rows4 = tk.Button(self.selectionFrame, text="4", command=lambda: self.changeRows(4))
-        # rows4.place(rely=0, relx=0.4, relwidth=0.2, relheight=0.1)
-        #
-        # rows5 = tk.Button(self.selectionFrame, text="5", command=lambda: self.changeRows(5))
-        # rows5.place(rely=0, relx=0.7, relwidth=0.2, relheight=0.1)
-        #
-        # #creating 3 buttons to change grid size
-        # self.rowButtons=[rows3, rows4, rows5]
 
         self.rowButtons=list(map(lambda x: tk.Button( self.selectionFrame,text=str(x),
                                                       command=lambda: self.changeSize(x)),range (3, 6)))
@@ -65,6 +54,19 @@ class GuiPart:
         self.menuFrame.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.7)
         self.changeSize(3)
 
+        self.AISelectionFrame = tk.Frame(self.guiFrame, bg=GUI_COLOR)
+
+        EasyAIButton = tk.Button(self.AISelectionFrame, text='Tryb latwy',
+                                     command=lambda: [self.newGame(True, "easy"), self.StartTimer()])
+        EasyAIButton.place(rely=0.2, relx=0.1, relwidth=0.8, relheight=0.15)
+
+        HardAIButton = tk.Button(self.AISelectionFrame, text='Tryb trudny',
+                                       command=lambda: [self.newGame(True, "hard"), self.StartTimer()])
+        HardAIButton.place(rely=0.45, relx=0.1, relwidth=0.8, relheight=0.15)
+
+        menuAIButton = tk.Button(self.AISelectionFrame, text="Powrót do menu głównego",
+                               command=lambda: self.changeScreen(self.AISelectionFrame, self.selectionFrame))
+        menuAIButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
     def changeScreen(self, oldScreen, newScreen):
         oldScreen.place_forget()
         newScreen.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.8)
@@ -75,9 +77,14 @@ class GuiPart:
             self.rowButtons[i]["bg"]="white"
         self.rowButtons[n-3]["bg"]="red"
 
-    def newGame(self):
+    def newGame(self,withAI: bool,AIType="easy"):
+
+        self.withAI: bool=withAI
+        self.AIType=AIType
         self.gameFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
         self.board = Board(self.size)
+        if withAI:
+            self.AIPlayer = AIPlayer(self.board)
 
         self.gameButtons = list(map(lambda y: list(map(lambda x: tk.Button(self.gameFrame,
                                             command=lambda: self.gameButtonClicked(y,x)), range(self.size))), range(self.size)))
@@ -91,11 +98,11 @@ class GuiPart:
         self.moveToStartButton.place(rely=0.92, relx=0, relwidth=0.2, relheight=0.06)
 
         self.moveBackButton = tk.Button(self.gameFrame, text="<",
-                                        command=lambda: [self.board.undo_move(), self.updateAllCellsText()])
+                                        command=lambda: [self.board.undo_move(), self.board.undo_move() if self.withAI else Null, self.updateAllCellsText()])
         self.moveBackButton.place(rely=0.92, relx=0.25, relwidth=0.2, relheight=0.06)
 
         self.moveForwardButton = tk.Button(self.gameFrame, text=">",
-                                        command=lambda: [self.board.repeat_move(), self.updateAllCellsText()])
+                                        command=lambda: [self.board.repeat_move(), self.board.repeat_move() if self.withAI else Null, self.updateAllCellsText()])
         self.moveForwardButton.place(rely=0.92, relx=0.55, relwidth=0.2, relheight=0.06)
 
         self.moveToLastButton = tk.Button(self.gameFrame, text=">>",
@@ -115,16 +122,36 @@ class GuiPart:
         else:
             self.gameButtons[row][col]["text"] = self.board.getValue(row, col)
 
-    def gameButtonClicked(self, row, col):
-        self.board.changeTile(row, col)
-        self.updateCellText(row,col)
+    def checkEndGame(self):
         if self.board.checkIfWin():
             self.stopTimer()
             self.board.swapPlayer()
             self.endOfGame("Wygrał " + self.board.player + "\n Powrót do menu głównego")
+            return True
+
         if self.board.checkIfFull():
             self.stopTimer()
             self.endOfGame("Remis! \n Powrót do menu głównego")
+            return True
+        return False
+
+    def gameButtonClicked(self, row, col):
+        self.board.changeTile(row, col)
+        self.updateCellText(row,col)
+        if self.checkEndGame():
+            return
+
+        if self.withAI:
+            if self.AIType=="hard":
+                self.AIPlayer.makeMove()
+                self.updateAllCellsText()
+                self.checkEndGame()
+                return
+            if self.AIType=="easy":
+                self.AIPlayer.makeRandomMove()
+                self.updateAllCellsText()
+                self.checkEndGame()
+                return
 
 
 

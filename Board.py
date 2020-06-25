@@ -13,7 +13,6 @@ class Board:
         if self.tiles[row][col]!=".":
             print("To miejsce jest juz zajete!")
             return False
-
         self.moves.append((row,col))
         self.tiles[row][col] = self.player
         self.swapPlayer()
