@@ -163,21 +163,27 @@ class GuiPart:
         returnButton = tk.Button(self.gameFrame, text=text, bg='#A4B691', command=lambda: self.backToMenu())
         returnButton.place(rely=0.2, relx=0.2, relwidth=0.6, relheight=0.3)
 
-    def backToMenu(self):
+    def backToMenu(self)-> None:
+        """Deletes the timer label after finished game."""
+        
         self.changeScreen(self.gameFrame, self.menuFrame)
         self.gameFrame.destroy()
         self.timer.destroy()
 
-    def StartTimer(self):
-        self._start = 0.0
-        self._time_passed = 0.0
-        self._running = 0
+    def StartTimer(self)-> None:
+        """Starts counting time and places the label with timer."""
+        
+        self._start: float = 0.0
+        self._time_passed: float = 0.0
+        self._running: bool = 0
         self.time_str = tk.StringVar()
-
+        
+        #placing the label with timer
         self.timer = tk.Label(self.guiFrame, textvariable=self.time_str, bg = GUI_COLOR, font = (20))
         self.setTime(self._time_passed)
         self.timer.pack()
-
+        
+        #updating the timer
         if not self._running:
             self._start = time.time() - self._time_passed
             self.timeUpdate()
@@ -198,8 +204,6 @@ class GuiPart:
     def stopTimer(self):
         if self._running:
             root.after_cancel(self._timer)
-            self._elapsedtime = time.time() - self._start
-            self.setTime(self._time_passed)
             self._running = 0
 
 root=tk.Tk()
