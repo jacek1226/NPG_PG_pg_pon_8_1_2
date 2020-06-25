@@ -1,7 +1,4 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-#cur.fetchall - pobierasz z bazy danych
-#con.commit - wysyłasz do bazy danych
+
 from enum import Enum
 import sqlite3
 class Wynik(Enum):
@@ -61,10 +58,10 @@ czytajdane()
 con.close()
 
 def sprawdz_uzytkownika(nazwa_uzytkownika)-> bool :
-    data = cur.fetchall()  # czyszczcenie danych
-    cur.execute('SELECT nazwa_uzytkownika FROM uzytkownik WHERE nazwa_uzytkownika = ?', ('Pawel',))  # sql znajdz wszysstkich uzytkownikow o takim imieniu
-    data = cur.fetchall()  # przypisawanie wszystkich uzytkownikow do zmiennej data
-    if not data:  # sprawdzasz czy data nie jest pusta
+    data = cur.fetchall() 
+    cur.execute('SELECT nazwa_uzytkownika FROM uzytkownik WHERE nazwa_uzytkownika = ?', ('Pawel',)) 
+    data = cur.fetchall()  
+    if not data:  
         return False
     else:
         return True
