@@ -1,9 +1,9 @@
 from enum import Enum
 import sqlite3
-class Wynik(Enum):
-    PRZEGRANA: int = 1
-    WYGRANA: int = 2
-    REMIS: int = 3
+class Result(Enum):
+    DEFEAT: int = 1
+    WIN: int = 2
+    TIE: int = 3
 
 
 class Database:
@@ -15,10 +15,8 @@ class Database:
         # utworzenie obiektu kursora
         self.cur = self.con.cursor()
         self.createTable()
-        self.dodajUzytkownika("Kasia")
-        self.czytajDane()
-        self.zaaktualizujStatystyki("Kasia", Wynik.PRZEGRANA)
-        self.czytajDane()
+        self.addUser("Kasia")
+        self.readData()
 
 
 
@@ -26,16 +24,16 @@ class Database:
     def createTable(self):
         self.cur.executescript("""
         CREATE TABLE IF NOT EXISTS uzytkownik (
-            nazwaUzytkownika varchar(10) PRIMARY KEY,
+            userName varchar(10) PRIMARY KEY,
             wygrane INTEGER,
             przegrane INTEGER,
             remisy INTEGER,
-            liczbaGier INTEGER
+            gameNumber INTEGER
              )""")
 
 
     # wyświetl dane
-    def czytajDane(self):
+    def readData(self):
         self.cur.execute('SELECT * FROM uzytkownik')
         data = self.cur.fetchall()
         for row in data:
@@ -43,40 +41,40 @@ class Database:
         return data
 
 
-    def sprawdzUzytkownika(self, nazwaUzytkownika)-> bool :
+    def checkUser(self, userName:str)-> bool :
         data = self.cur.fetchall()
-        self.cur.execute('SELECT nazwaUzytkownika FROM uzytkownik WHERE nazwaUzytkownika = ?', (nazwaUzytkownika,))
+        self.cur.execute('SELECT userName FROM uzytkownik WHERE userName = ?', (userName,))
         data = self.cur.fetchall()
         if not data:
             return False
         else:
             return True
 
-    def dodajUzytkownika(self,nazwaUzytkownika):
-        if self.sprawdzUzytkownika(nazwaUzytkownika):
+    def addUser(self,userName:str)-> bool:
+        if self.checkUser(userName):
             return False
         else:
-            self.cur.execute("INSERT INTO uzytkownik(nazwaUzytkownika, wygrane, przegrane, remisy, liczbaGier) VALUES(?,?,?,?,?)",(nazwaUzytkownika,0,0,0,0))
+            self.cur.execute("INSERT INTO uzytkownik(userName, wygrane, przegrane, remisy, gameNumber) VALUES(?,?,?,?,?)",(userName,0,0,0,0))
             self.con.commit()
             return True
 
-    def zaaktualizujStatystyki(self,nazwaUzytkownika, wynik:Wynik):
-        self.cur.execute('SELECT * FROM uzytkownik WHERE nazwaUzytkownika = ?', (nazwaUzytkownika,))
+    def updateStatistics(self,userName:str, result:Result)-> bool:
+        self.cur.execute('SELECT * FROM uzytkownik WHERE userName = ?', (userName,))
         data = self.cur.fetchone()
         if(not data):
             return False
-        liczbaGier=data[4]
-        self.cur.execute('UPDATE uzytkownik SET liczbaGier=? WHERE nazwaUzytkownika=?',
-                         (liczbaGier + 1, nazwaUzytkownika))
-        if wynik == Wynik.PRZEGRANA:
-            liczbaPrzegranych = data[2]
-            self.cur.execute('UPDATE uzytkownik SET przegrane=? WHERE nazwaUzytkownika=?', (liczbaPrzegranych+1, nazwaUzytkownika))
-        elif wynik == Wynik.WYGRANA:
-            liczbaWygranych = data[1]
-            cur.execute('UPDATE uzytkownik SET wygrane=? WHERE nazwaUzytkownika=?', (liczbaWygranych+1, nazwaUzytkownika))
-        elif wynik == Wynik.REMIS:
-            liczbaRemisow = data[3]
-            cur.execute('UPDATE uzytkownik SET remisy=? WHERE nazwaUzytkownika=?', (liczbaRemisow+1, nazwaUzytkownika))
+        gameNumber=data[4]
+        self.cur.execute('UPDATE uzytkownik SET gameNumber=? WHERE userName=?',
+                         (gameNumber + 1, userName))
+        if result == Result.DEFEAT:
+            defeatNumber = data[2]
+            self.cur.execute('UPDATE uzytkownik SET przegrane=? WHERE userName=?', (defeatNumber+1, userName))
+        elif result == Result.WIN:
+            winNumber = data[1]
+            cur.execute('UPDATE uzytkownik SET wygrane=? WHERE userName=?', (winNumber+1, userName))
+        elif result == Result.TIE:
+            tieNumber = data[3]
+            cur.execute('UPDATE uzytkownik SET remisy=? WHERE userName=?', (tieNumber+1, userName))
 
         self.con.commit()
         return True
