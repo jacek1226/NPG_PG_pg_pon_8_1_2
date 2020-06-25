@@ -198,8 +198,6 @@ class GuiPart:
     def stopTimer(self):
         if self._running:
             root.after_cancel(self._timer)
-            self._elapsedtime = time.time() - self._start
-            self.setTime(self._time_passed)
             self._running = 0
 
 root=tk.Tk()
