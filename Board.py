@@ -1,9 +1,11 @@
+from typing import *
+
 class Board:
 
 
     def __init__ (self,size):
-        self.moves = []
-        self.undone_moves = []
+        self.moves: List[Tuple[int, int]] = [] #List of moves' coordinates
+        self.undone_moves: List[Tuple[int, int]] = [] #List of undone moves' coordinates
         self.size=size
         self.tiles = [["." for col in range(size)] for row in range(size)]
         self.player='X'
@@ -78,12 +80,19 @@ class Board:
                 countedSymbol = currentSymbol
         return False
 
-    def undo_move(self):
+    def undo_move(self) -> None:
+        """Undoes the previous move, which coordinates are
+        deleted from list 'moves' and added to list 'undone moves'.
+        :return:
+        """
+        
         try:
-            undo_coordinates = self.moves[-1]
+            undo_coordinates: Tuple[int, int] = self.moves[-1]
         except IndexError:
             print("Nie możesz już dalej cofnąć! Jesteś na początku gry!")
         else:
+            undo_row: int
+            undo_col: int
             undo_row, undo_col = undo_coordinates
             self.tiles[undo_row][undo_col] = "."
             self.swapPlayer()
@@ -91,12 +100,19 @@ class Board:
             self.undone_moves.append(undo_coordinates)
         return
 
-    def repeat_move(self):
+    def repeat_move(self) -> None:
+        """Restores the last undone move, which coordinates are
+        deleted from list 'undone_moves' and added to list 'moves'.
+        :return:
+        """
+        
         try:
-            repeat_coordinates = self.undone_moves[-1]
+            repeat_coordinates: Tuple[int, int] = self.undone_moves[-1]
         except IndexError:
             print("Nie ma już ruchów do przywrócenia!")
         else:
+            repeat_row: int
+            repeat_col: int
             repeat_row, repeat_col = repeat_coordinates
 
             self.tiles[repeat_row][repeat_col] = self.player
@@ -110,14 +126,21 @@ class Board:
             self.undone_moves.pop(-1)
         return
 
-    def undo_all_moves(self):
+    def undo_all_moves(self) -> None:
+        """Undoes all the moves, which coordinates are
+        deleted from list 'moves' and added to list 'undone moves'.
+        :return:
+        """
+
         try:
-            undo_all_coordinates = self.moves[-1]
+            undo_all_coordinates: Tuple[int, int] = self.moves[-1]
         except IndexError:
             print("Już jesteś na początku gry!")
         else:
             for i in range(len(self.moves)):
                 undo_all_coordinates = self.moves[-1]
+                undo_all_row: int
+                undo_all_col: int
                 undo_all_row, undo_all_col = undo_all_coordinates
                 self.tiles[undo_all_row][undo_all_col] = "."
                 self.swapPlayer()
@@ -126,14 +149,20 @@ class Board:
 
         return
 
-    def repeat_all_moves(self):
+    def repeat_all_moves(self) -> None:
+        """Restores all the undone moves, which coordinates are
+        deleted from list 'undone_moves' and added to list 'moves'.
+        :return:
+        """
         try:
-            repeat_all_coordinates = self.undone_moves[-1]
+            repeat_all_coordinates: Tuple[int, int] = self.undone_moves[-1]
         except IndexError:
             print("Wszystkie ruchy zostały już przywrócone!")
         else:
             for i in range(len(self.undone_moves)):
                 repeat_all_coordinates = self.undone_moves[-1]
+                repeat_all_row: int
+                repeat_all_col: int
                 repeat_all_row, repeat_all_col = repeat_all_coordinates
 
                 self.tiles[repeat_all_row][repeat_all_col] = self.player
