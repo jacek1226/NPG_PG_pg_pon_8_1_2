@@ -1,26 +1,22 @@
 class Board:
 
+
     def __init__ (self,size):
+        self.moves = []
+        self.undone_moves = []
         self.size=size
         self.tiles = [["." for col in range(size)] for row in range(size)]
         self.player='X'
         self.numToWin=size if size==3 else 4
 
-    def printBoard(self):
-        print()
-        for row in range (0,self.size):
-            for col in range (0,self.size):
-                print(self.tiles[row][col], end=' ')
-            print()
-        print()
-
     def changeTile(self,row, col):
         if self.tiles[row][col]!=".":
             print("To miejsce jest juz zajete!")
-            return None
+            return False
+
+        self.moves.append((row,col))
         self.tiles[row][col] = self.player
         self.swapPlayer()
-        print("Zmienione!")
         return True
 
     def swapPlayer(self):
@@ -82,3 +78,67 @@ class Board:
                 counter = 1
                 countedSymbol = currentSymbol
         return False
+
+    def undo_move(self):
+        try:
+            undo_coordinates = self.moves[-1]
+        except IndexError:
+            print("Nie możesz już dalej cofnąć! Jesteś na początku gry!")
+        else:
+            undo_row, undo_col = undo_coordinates
+            self.tiles[undo_row][undo_col] = "."
+            self.swapPlayer()
+            self.moves.pop(-1)
+            self.undone_moves.append(undo_coordinates)
+        return
+
+    def repeat_move(self):
+        try:
+            repeat_coordinates = self.undone_moves[-1]
+        except IndexError:
+            print("Nie ma już ruchów do przywrócenia!")
+        else:
+            repeat_row, repeat_col = repeat_coordinates
+
+            self.tiles[repeat_row][repeat_col] = self.player
+            self.swapPlayer()
+
+            self.moves.append(repeat_coordinates)
+            for i in range(len(self.moves) - 1):
+                if self.moves[i] == repeat_coordinates:
+                    del self.moves[i]
+
+            self.undone_moves.pop(-1)
+        return
+
+    def undo_all_moves(self):
+        try:
+            undo_all_coordinates = self.moves[-1]
+        except IndexError:
+            print("Już jesteś na początku gry!")
+        else:
+            for i in range(len(self.moves)):
+                undo_all_coordinates = self.moves[-1]
+                undo_all_row, undo_all_col = undo_all_coordinates
+                self.tiles[undo_all_row][undo_all_col] = "."
+                self.swapPlayer()
+                self.moves.pop(-1)
+                self.undone_moves.append(undo_all_coordinates)
+
+        return
+
+    def repeat_all_moves(self):
+        try:
+            repeat_all_coordinates = self.undone_moves[-1]
+        except IndexError:
+            print("Wszystkie ruchy zostały już przywrócone!")
+        else:
+            for i in range(len(self.undone_moves)):
+                repeat_all_coordinates = self.undone_moves[-1]
+                repeat_all_row, repeat_all_col = repeat_all_coordinates
+
+                self.tiles[repeat_all_row][repeat_all_col] = self.player
+                self.swapPlayer()
+                self.undone_moves.pop(-1)
+                self.moves.append(repeat_all_coordinates)
+        return

@@ -1,7 +1,4 @@
-
 import tkinter as tk
-import queue
-import threading
 import time
 import random as rand
 from Board import Board
@@ -9,86 +6,11 @@ from Board import Board
 HEIGHT= 400
 WIDTH = 400
 GUI_COLOR='#5584B4'
-def uaktualnij_statystyki():
-    print("a")
 
-    #To class board
-    """ 
-    self.moves = []
-    self.undone_moves = []
-    def undo_move(self):
-        try:
-            undo_coordinates = self.moves[-1]
-        except IndexError:
-            print("Nie możesz już dalej cofnąć! Jesteś na początku gry!")
-        else:
-            undo_row, undo_col, undo_side = undo_coordinates
-            self.tiles[undo_row - 1][undo_col - 1] = "."
-            self.moves.pop(-1)
-            self.undone_moves.append(undo_coordinates)
-        return
-
-    def repeat_move(self, values):
-        try:
-            repeat_coordinates = self.undone_moves[-1]
-        except IndexError:
-            print("Nie ma już ruchów do przywrócenia!")
-        else:
-            repeat_row, repeat_col, repeat_side = repeat_coordinates
-            if repeat_side == 0:
-                repeat_side = 1
-            else:
-                repeat_side = 0
-
-            self.tiles[repeat_row - 1][repeat_col - 1] = values[repeat_side]
-
-            moves.append(repeat_coordinates)
-            for i in range (len(moves) - 1):
-                if moves[i] == repeat_coordinates:
-                    del moves[i]
-
-            undone_moves.pop(-1)
-        return
-
-    def undo_all_moves(self, moves, undone_moves):
-        try:
-            undo_all_coordinates = moves[-1]
-        except IndexError:
-            print("Już jesteś na początku gry!")
-        else:
-            for i in range(len(moves)):
-                undo_all_coordinates = moves[-1]
-                undo_all_row, undo_all_col, undo_all_side = undo_all_coordinates
-                self.tiles[undo_all_row - 1][undo_all_col - 1] = "."
-                moves.pop(-1)
-                undone_moves.append(undo_all_coordinates)
-
-        return
-
-    def repeat_all_moves(self, moves, values, undone_moves):
-        try:
-            repeat_all_coordinates = undone_moves[-1]
-        except IndexError:
-            print("Wszystkie ruchy zostały już przywrócone!")
-        else:
-            for i in range(len(undone_moves)):
-                repeat_all_coordinates = undone_moves[-1]
-                repeat_all_row, repeat_all_col, repeat_all_side = repeat_all_coordinates
-
-                if repeat_all_side == 0:
-                    repeat_all_side = 1
-                else:
-                    repeat_all_side = 0
-
-                self.tiles[repeat_all_row - 1][repeat_all_col - 1] = values[repeat_all_side]
-                undone_moves.pop(-1)
-                moves.append(repeat_all_coordinates)
-        return
-    """
 class GuiPart:
-    def __init__(self, root, mainQueue, endCommand):
-        self.queue=mainQueue
+    def __init__(self, root):
         self.root=root
+        self.GAMEHEIGHT = 7 / 8
         #defining always visible elements of GUI
         canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
         canvas.pack()
@@ -113,7 +35,7 @@ class GuiPart:
 
         #defining game choosing interface
         self.selectionFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
-        normalGameButton = tk.Button(self.selectionFrame, text='Gra w 2 osoby', command=lambda: self.newGame())
+        normalGameButton = tk.Button(self.selectionFrame, text='Gra w 2 osoby', command=lambda: [self.newGame(), self.StartTimer()])
         normalGameButton.place(rely=0.2, relx=0.1, relwidth=0.8, relheight=0.15)
 
         computerGameButton = tk.Button(self.selectionFrame, text='Gra z komputerem')
@@ -145,7 +67,7 @@ class GuiPart:
 
     def changeScreen(self, oldScreen, newScreen):
         oldScreen.place_forget()
-        newScreen.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.7)
+        newScreen.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.8)
 
     def changeSize(self, n):
         self.size=n
@@ -161,17 +83,47 @@ class GuiPart:
                                             command=lambda: self.gameButtonClicked(y,x)), range(self.size))), range(self.size)))
         for i in range(self.size):
             for j in range(self.size):
-                self.gameButtons[i][j].place(rely=(1/self.size)*i, relx=(1/self.size)*j, relwidth=(1/self.size),
-                                             relheight=(1/self.size))
+                self.gameButtons[i][j].place(rely=(1/self.size)*i*self.GAMEHEIGHT, relx=(1/self.size)*j, relwidth=(1/self.size),
+                                             relheight=(1/self.size)*self.GAMEHEIGHT)
+
+        self.moveToStartButton = tk.Button(self.gameFrame, text="<<",
+                                           command=lambda: [self.board.undo_all_moves(), self.updateAllCellsText()])
+        self.moveToStartButton.place(rely=0.92, relx=0, relwidth=0.2, relheight=0.06)
+
+        self.moveBackButton = tk.Button(self.gameFrame, text="<",
+                                        command=lambda: [self.board.undo_move(), self.updateAllCellsText()])
+        self.moveBackButton.place(rely=0.92, relx=0.25, relwidth=0.2, relheight=0.06)
+
+        self.moveForwardButton = tk.Button(self.gameFrame, text=">",
+                                        command=lambda: [self.board.repeat_move(), self.updateAllCellsText()])
+        self.moveForwardButton.place(rely=0.92, relx=0.55, relwidth=0.2, relheight=0.06)
+
+        self.moveToLastButton = tk.Button(self.gameFrame, text=">>",
+                                        command=lambda: [self.board.repeat_all_moves(), self.updateAllCellsText()])
+        self.moveToLastButton.place(rely=0.92, relx=0.8, relwidth=0.2, relheight=0.06)
+
         self.changeScreen(self.selectionFrame, self.gameFrame)
+
+    def updateAllCellsText(self):
+        for row in range(self.size):
+            for col in range(self.size):
+                self.updateCellText(row,col)
+
+    def updateCellText(self,row,col):
+        if self.board.getValue(row, col) == '.':
+            self.gameButtons[row][col]["text"] = ""
+        else:
+            self.gameButtons[row][col]["text"] = self.board.getValue(row, col)
 
     def gameButtonClicked(self, row, col):
         self.board.changeTile(row, col)
-        self.gameButtons[row][col]["text"]=self.board.getValue(row,col)
+        self.updateCellText(row,col)
         if self.board.checkIfWin():
+            self.stopTimer()
             self.board.swapPlayer()
             self.endOfGame("Wygrał " + self.board.player + "\n Powrót do menu głównego")
         if self.board.checkIfFull():
+            self.stopTimer()
             self.endOfGame("Remis! \n Powrót do menu głównego")
 
 
@@ -187,87 +139,43 @@ class GuiPart:
     def backToMenu(self):
         self.changeScreen(self.gameFrame, self.menuFrame)
         self.gameFrame.destroy()
+        self.timer.destroy()
+
+    def StartTimer(self):
+        self._start = 0.0
+        self._time_passed = 0.0
+        self._running = 0
+        self.time_str = tk.StringVar()
+
+        self.timer = tk.Label(self.guiFrame, textvariable=self.time_str, bg = GUI_COLOR, font = (20))
+        self.setTime(self._time_passed)
+        self.timer.pack()
+
+        if not self._running:
+            self._start = time.time() - self._time_passed
+            self.timeUpdate()
+            self._running = 1
+
+    def setTime(self, passed):
+        minutes = int(passed / 60)
+        seconds = int(passed - minutes * 60.0)
+        centy_seconds = int((passed - minutes * 60.0 - seconds) * 100)
+        self.time_str.set('%02d:%02d:%02d' % (minutes, seconds, centy_seconds))
 
 
-    def processIncoming(self):
-        while self.queue.qsize(  ):
-            try:
-                msg = self.queue.get(0)
-                print(msg)
-            except queue.Empty:
-                pass
+    def timeUpdate(self):
+        self._time_passed = time.time() - self._start
+        self.setTime(self._time_passed)
+        self._timer = root.after(50, self.timeUpdate)
 
-
-
-class ThreadedClient:
-    """
-    Launch the main part of the GUI and the worker thread. periodicCall and
-    endApplication could reside in the GUI part, but putting them here
-    means that you have all the thread controls in a single place.
-    """
-
-    def __init__ (self, master):
-        """
-        Start the GUI and the asynchronous threads. We are in the main
-        (original) thread of the application, which will later be used by
-        the GUI as well. We spawn a new thread for the worker (I/O).
-        """
-        self.master = master
-
-        # Create the queue
-        self.queue = queue.Queue(  )
-
-        # Set up the GUI part
-        self.gui = GuiPart(master, self.queue, self.endApplication)
-
-        # Set up the thread to do asynchronous I/O
-        # More threads can also be created and used, if necessary
-        self.running = 1
-        # self.thread1 = threading.Thread(target=self.workerThread1)
-        # self.thread1.start(  )
-
-        # Start the periodic call in the GUI to check if the queue contains
-        # anything
-        # self.periodicCall(  )
-
-    def periodicCall(self):
-        """
-        Check every 200 ms if there is something new in the queue.
-        """
-        self.gui.processIncoming(  )
-        if not self.running:
-            # This is the brutal stop of the system. You may want to do
-            # some cleanup before actually shutting it down.
-            import sys
-            sys.exit(1)
-        self.master.after(200, self.periodicCall)
-
-    def workerThread1(self):
-        """
-        This is where we handle the asynchronous I/O. For example, it may be
-        a 'select(  )'. One important thing to remember is that the thread has
-        to yield control pretty regularly, by select or otherwise.
-        """
-        while self.running:
-            # To simulate asynchronous I/O, we create a random number at
-            # random intervals. Replace the following two lines with the real
-            # thing.
-            time.sleep(rand.random(  ) * 1.5)
-            # msg = rand.random(  )
-            # self.queue.put(msg)
-
-    def endApplication(self):
-        self.running = 0
-
+    def stopTimer(self):
+        if self._running:
+            root.after_cancel(self._timer)
+            self._elapsedtime = time.time() - self._start
+            self.setTime(self._time_passed)
+            self._running = 0
 
 root=tk.Tk()
 
-client= ThreadedClient(root)
+gui = GuiPart(root)
 root.mainloop()
-
-# background_image = tk.PhotoImage(file='./hindus.png')
-# background_label = tk.Label(root, image=background_image)
-# background_label.place(relwidth=1, relheight=1)
-#
-# entry=tk.Entry(frame)
-# entry.place(relwidth=0.65, relheight=1)
