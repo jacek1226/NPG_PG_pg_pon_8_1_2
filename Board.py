@@ -207,3 +207,4 @@ class Board:
                 self.undone_moves.pop(-1)
                 self.moves.append(repeat_all_coordinates)
         return
+

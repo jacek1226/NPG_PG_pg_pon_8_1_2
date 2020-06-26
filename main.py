@@ -5,7 +5,7 @@ import random as rand
 from Board import Board
 from AIPlayer import AIPlayer
 from database import Database,Result
-import typing
+from typing import *
 
 #defining size and color of the windows
 HEIGHT= 400
@@ -99,7 +99,7 @@ class GuiPart:
         newScreen : tk.Frame
         The new frame, which is placed instead of oldScreen.
         """
-
+        
         oldScreen.place_forget()
         #defining the location of newScreen
         newScreen.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.8)
@@ -238,9 +238,8 @@ class GuiPart:
             self.tree.column(colName, width=colWidths[idx], minwidth=25)
             self.tree.heading(colName, text=colName, anchor=tk.W)
 
-        #array of users' names
-        namesTable: Array[str]=[]
-
+        #list of users' names
+        namesTable: List[str]=[]
         for row in self.data:
             name,wins,defeats,ties,gameNum = row
             self.tree.insert("",'end', text="", values=(name,wins,defeats,ties,gameNum))
@@ -257,11 +256,13 @@ class GuiPart:
 
     def closeStatistics(self):
         """Changes the screen from statistics to main menu."""
+        
         self.changeScreen(self.statisticsFrame, self.menuFrame)
         self.statisticsFrame.destroy()
 
     def updateAllCellsText(self):
         """Updates all board tiles' values."""
+        
         for row in range(self.size):
             for col in range(self.size):
                 self.updateCellText(row,col)
@@ -293,7 +294,7 @@ class GuiPart:
             self.stopTimer()
             self.board.swapPlayer()
             self.endOfGame("Wygrał " + self.board.player + "\n Powrót do menu głównego")
-            if self.board.player =="X":
+            if self.board.player == "X":
                 self.db.updateStatistics(self.playerOne.get(), Result.WIN)
                 if not self.withAI:
                     self.db.updateStatistics(self.playerTwo.get(), Result.DEFEAT)
@@ -301,7 +302,6 @@ class GuiPart:
                 self.db.updateStatistics(self.playerOne.get(), Result.DEFEAT)
                 if not self.withAI:
                     self.db.updateStatistics(self.playerTwo.get(), Result.WIN)
-
             return True
 
         if self.board.checkIfFull():
@@ -349,7 +349,7 @@ class GuiPart:
         text : str
         Feedback displayed after the game is finished (who won or if there was a draw).
         """
-
+        
         for i in range(self.size):
             for j in range(self.size):
                 self.gameButtons[i][j].config(command=lambda: None)
@@ -398,7 +398,7 @@ class GuiPart:
 
     def timeUpdate(self) -> None:
         """Updates the time that passed since the beginning of the game."""
-
+        
         self._time_passed = time.time() - self._start
         self.setTime(self._time_passed)
         self._timer = root.after(50, self.timeUpdate)
@@ -412,11 +412,11 @@ class GuiPart:
 
     def addPlayer(self):
         """Adds new player to the statistics."""
+        
         newName : str =self.newPlayerEntry.get()
         self.db.addUser(newName)
         self.closeStatistics()
         self.showStatistics()
-
 
 root=tk.Tk()
 
