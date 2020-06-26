@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import *
 import sqlite3
 class Result(Enum):
     DEFEAT: int = 1
@@ -8,15 +9,22 @@ class Result(Enum):
 
 class Database:
     def __init__(self):
-        # utworzenie połączenia z bazą przechowywaną na dysku
-        self.con = sqlite3.connect('test.db')
-        # dostęp do kolumn przez indeksy i przez nazwy
-        self.con.row_factory = sqlite3.Row
-        # utworzenie obiektu kursora
-        self.cur = self.con.cursor()
-        self.createTable()
-        self.addUser("Kasia")
-        self.readData()
+        try:
+            # utworzenie połączenia z bazą przechowywaną na dysku
+            self.con = sqlite3.connect('test.db')
+            # dostęp do kolumn przez indeksy i przez nazwy
+            self.con.row_factory = sqlite3.Row
+            # utworzenie obiektu kursora
+            self.cur = self.con.cursor()
+            self.createTable()
+            self.addUser("Statistics 1")
+            self.addUser("Statistics 2")
+            self.connection= True
+            self.columnNames=("nazwa", "wygrane", "przegrane", "remisy", "liczba gier")
+        except:
+            print("blad w polaczeniu z baza danych!")
+            self.connection = False
+
 
 
 
@@ -33,15 +41,13 @@ class Database:
 
 
     # wyświetl dane
-    def readData(self):
+    def readData(self)->List[str]:
         self.cur.execute('SELECT * FROM uzytkownik')
         data = self.cur.fetchall()
-        for row in data:
-            print(f"{row[0]} {row[1]} {row[2]} {row[3]} {row[4]} ")
         return data
 
 
-    def checkUser(self, userName:str)-> bool :
+    def checkUser(self, userName)-> bool :
         data = self.cur.fetchall()
         self.cur.execute('SELECT userName FROM uzytkownik WHERE userName = ?', (userName,))
         data = self.cur.fetchall()
@@ -50,7 +56,7 @@ class Database:
         else:
             return True
 
-    def addUser(self,userName:str)-> bool:
+    def addUser(self,userName):
         if self.checkUser(userName):
             return False
         else:
@@ -58,7 +64,7 @@ class Database:
             self.con.commit()
             return True
 
-    def updateStatistics(self,userName:str, result:Result)-> bool:
+    def updateStatistics(self,userName, result:Result):
         self.cur.execute('SELECT * FROM uzytkownik WHERE userName = ?', (userName,))
         data = self.cur.fetchone()
         if(not data):
@@ -71,10 +77,10 @@ class Database:
             self.cur.execute('UPDATE uzytkownik SET przegrane=? WHERE userName=?', (defeatNumber+1, userName))
         elif result == Result.WIN:
             winNumber = data[1]
-            cur.execute('UPDATE uzytkownik SET wygrane=? WHERE userName=?', (winNumber+1, userName))
+            self.cur.execute('UPDATE uzytkownik SET wygrane=? WHERE userName=?', (winNumber+1, userName))
         elif result == Result.TIE:
             tieNumber = data[3]
-            cur.execute('UPDATE uzytkownik SET remisy=? WHERE userName=?', (tieNumber+1, userName))
+            self.cur.execute('UPDATE uzytkownik SET remisy=? WHERE userName=?', (tieNumber+1, userName))
 
         self.con.commit()
         return True
