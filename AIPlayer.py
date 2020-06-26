@@ -83,15 +83,15 @@ class AIPlayer:
                 if not self.tryToFindWith(self.onlyMyTiles, self.withoutOppositeSign):
                     self.makeRandomMove()
 
-    def tryToFindWith(self, equalToGivenSign:method, satisfies:method)-> bool:
+    def tryToFindWith(self, equalToGivenSign:Callable, satisfies:Callable)-> bool:
         print(aaaa)
         """Chcecks if there is a line meeting requirements, return false when there is no such a line.
         
         Parameters
         ------
-        equalToGivenSign : method
+        equalToGivenSign : Callable
             Check whose sign is it
-        satisfies : method
+        satisfies : Callable
             Check if line is proper
         Returns
         ------
