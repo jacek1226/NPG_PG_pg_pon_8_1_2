@@ -1,7 +1,7 @@
 from typing import *
 
 class Board:
-
+"""Class board is responsible for creating a game board and basic functionality of a game of tic tac toe"""
 
     def __init__ (self,size):
         self.moves: List[Tuple[int, int]] = []  # List of moves' coordinates
