@@ -293,13 +293,16 @@ class GuiPart:
             self.stopTimer()
             self.board.swapPlayer()
             self.endOfGame("Wygrał " + self.board.player + "\n Powrót do menu głównego")
-            return True
+            if self.board.player =="X":
+                self.db.updateStatistics(self.playerOne.get(), Result.WIN)
+                if not self.withAI:
+                    self.db.updateStatistics(self.playerTwo.get(), Result.DEFEAT)
+            else:
+                self.db.updateStatistics(self.playerOne.get(), Result.DEFEAT)
+                if not self.withAI:
+                    self.db.updateStatistics(self.playerTwo.get(), Result.WIN)
 
-        if self.board.checkIfFull():
-            self.stopTimer()
-            self.endOfGame("Remis! \n Powrót do menu głównego")
             return True
-        return False
 
         if self.board.checkIfFull():
             self.stopTimer()
