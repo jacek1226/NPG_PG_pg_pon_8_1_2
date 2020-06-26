@@ -17,3 +17,6 @@ Mimo że Asana i Github również oferują większość tych funkcji, to jednak 
 
 Podsumowując, wszystkie omówione systemy są podobnie dobre, jednak małe różnice występujące między nimi sprawiły, że za najbardziej nam odpowiadające i dostosowane do potrzeb naszego projeku uznaliśmy Trello.
 
+
+Projekt stworzyliśmy w języku Python wersja 3.8 z biblioteką graficzną Tkinter, dzięki której mogliśmy w prosty sposób utworzyć przyjemną dla oka grę. Do zarządzania bazą danych użyliśmy sqlite3, gdyż okazała się najprostrza w użyciu.
+
