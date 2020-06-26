@@ -49,7 +49,7 @@ class Board:
         Returns
         -------
         bool
-            true if the board is full (draw) or false if there are some epmty cells left (game goes on).
+            true if the board is full (draw) or false if there are some empty cells left (game goes on).
         """
 
         for row in range(0, self.size):
@@ -102,9 +102,9 @@ class Board:
             # transpose down
             value = value or self.checkLine(move, 0, 1, 1, self.size - move)
 
-        # check diagonal from left to right
+        # check diagonal from right to left
         for move in range(0, self.size - self.numToWin + 1):
-            # transpose right
+            # transpose left
             value = value or self.checkLine(0, self.size - 1 - move, 1, -1, self.size - move)
             # transpose down
             value = value or self.checkLine(move, self.size - 1, 1, -1, self.size - move)
@@ -112,10 +112,29 @@ class Board:
         return value
 
     def checkLine(self, startRow: int, startCol: int, moveRow: int, moveCol: int, numOfElem: int)-> bool:
+        """Checks, if there are enought symbols in row in given line, to end the game
+
+        Parameters
+        ----------
+        startRow: int
+        Row, in which is starting point of given line
+        startCol: int
+        Column, in which is starting point of given line
+        moveRow: int
+        How many cells to the down direction moves the line by each step
+        moveCol: int
+        How many cells to the rigth direction moves the line by each step
+        numOfElem: int
+        Number of Elements in given Line
+
+        Returns
+        -------
+        bool
+            true, if there are enought symbols in a row, to end the game (player/AI won), false otherwise.
+        """
         counter = 0
         countedSymbol = self.tiles[startRow][startCol]
         for elem in range(0, numOfElem):
-            # print(startRow + elem * moveRow, startCol + elem * moveCol)
             currentSymbol = self.tiles[startRow + elem * moveRow][startCol + elem * moveCol]
             if currentSymbol == ".":
                 counter = 0
