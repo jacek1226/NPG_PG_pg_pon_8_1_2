@@ -52,7 +52,7 @@ of the game and provides access to statistics of wins and looses."""
                                 command=lambda: self.showStatistics())
         statisticsButton.place(rely=0.45, relx=0.1, relwidth=0.8, relheight=0.15)
 
-        endButton : tk.Button  = tk.Button(self.menuFrame, text="Wyjdź", command=lambda: endCommand())
+        endButton : tk.Button  = tk.Button(self.menuFrame, text="Wyjdź", command=lambda: root.destroy())
         endButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
 
         self.menuFrame.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.7)
