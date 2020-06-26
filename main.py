@@ -14,9 +14,9 @@ GUI_COLOR='#5584B4'
 SMALL_WINDOW_COLOR='#F7F7F7'
 
 class GuiPart:
-"""Class GuiPart is responsible for creating an interface which allows to play a game
-with computer or one vs one with your friend. It creates a clock which measures the lenght 
-of the game and provides access to statistics of wins and looses."""
+    """Class GuiPart is responsible for creating an interface which allows to play a game
+    with computer or one vs one with your friend. It creates a clock which measures the lenght 
+    of the game and provides access to statistics of wins and looses."""
 
     def __init__(self, root:tk.Tk):
         self.root : tl.Tk =root
