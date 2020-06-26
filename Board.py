@@ -2,55 +2,104 @@ from typing import *
 
 class Board:
 
+    def __init__(self, size: int):
+        self.moves: List[Tuple[int, int]] = []  #List of moves' coordinates
+        self.undone_moves: List[Tuple[int, int]] = []  #List of undone moves' coordinates
+        self.size: int = size #size of the game board
+        self.tiles: List[List[str]] = [["." for col in range(size)] for row in range(size)] #board filled with "."
+        self.player: str = 'X' #player
+        self.numToWin: int = size if size == 3 else 4 #number of one symbol in a row which is enough to win
 
-    def __init__ (self,size):
-        self.moves: List[Tuple[int, int]] = [] #List of moves' coordinates
-        self.undone_moves: List[Tuple[int, int]] = [] #List of undone moves' coordinates
-        self.size=size
-        self.tiles = [["." for col in range(size)] for row in range(size)]
-        self.player='X'
-        self.numToWin=size if size==3 else 4
+    def changeTile(self, row: int, col: int)-> bool:
+        """Makes the move - places the right symbol (O or X) in the chosen cell.
 
-    def changeTile(self,row, col):
-        if self.tiles[row][col]!=".":
+        Parameters
+        ----------
+        row : int
+        Row in which is placed the cell that was chosen.
+        col : int
+        Column in which is placed the cell that was chosen.
+
+        Returns
+        -------
+        bool
+            true if the change was successful or false if the chosen cell is already full.
+        """
+
+        if self.tiles[row][col] != ".":
             print("To miejsce jest juz zajete!")
             return False
-        self.moves.append((row,col))
+        #adding move coordinates to the 'moves' list
+        self.moves.append((row, col))
         self.tiles[row][col] = self.player
         self.swapPlayer()
         return True
 
-    def swapPlayer(self):
-        if(self.player=='X'):
-            self.player='O'
-            return
-        self.player='X'
+    def swapPlayer(self)-> None:
+        """Swaps the current player."""
 
-    def checkIfFull(self):
-        for row in range (0,self.size):
-            for col in range (0,self.size):
+        if (self.player == 'X'):
+            self.player = 'O'
+            return
+        self.player = 'X'
+
+    def checkIfFull(self)-> bool:
+        """Checks if the board is full - if there are any empty cells.
+
+        Returns
+        -------
+        bool
+            true if the board is full (draw) or false if there are some epmty cells left (game goes on).
+        """
+
+        for row in range(0, self.size):
+            for col in range(0, self.size):
                 if self.tiles[row][col] == ".":
                     return False
         return True
 
-    def getValue(self,row, col):
+    def getValue(self, row: int, col: int)-> str:
+        """Gets the content from the choosen cell.
+
+        Parameters
+        ----------
+        row : int
+        Row in which is placed the choosen cell.
+        col : int
+        Column in which is placed the choosen cell.
+
+        Returns
+        -------
+        str
+            content of the choosen cell
+        """
+
+
         return self.tiles[row][col]
 
-    def checkIfWin(self):
-        #check vertical
-        value = False
-        for col in range (0, self.size):
-            value = value or self.checkLine(0,col,1,0,self.size)
+    def checkIfWin(self)-> bool:
+        """Checks if player won.
+
+        Returns
+        -------
+        bool
+            True if somebody won or false if game is still going.
+        """
+
+        # check vertical
+        value: bool = False
+        for col in range(0, self.size):
+            value = value or self.checkLine(0, col, 1, 0, self.size)
 
         # check horizontal
-        for row in range (0, self.size):
-            value = value or self.checkLine(row,0,0,1, self.size)
+        for row in range(0, self.size):
+            value = value or self.checkLine(row, 0, 0, 1, self.size)
 
-        #check diagonal from left to right
-        for move in range (0, self.size - self.numToWin + 1):
-            #transpose right
-            value = value or self.checkLine(0,move,1,1,self.size - move)
-            #transpose down
+        # check diagonal from left to right
+        for move in range(0, self.size - self.numToWin + 1):
+            # transpose right
+            value = value or self.checkLine(0, move, 1, 1, self.size - move)
+            # transpose down
             value = value or self.checkLine(move, 0, 1, 1, self.size - move)
 
         # check diagonal from left to right
@@ -59,11 +108,10 @@ class Board:
             value = value or self.checkLine(0, self.size - 1 - move, 1, -1, self.size - move)
             # transpose down
             value = value or self.checkLine(move, self.size - 1, 1, -1, self.size - move)
-            
+
         return value
 
-
-    def checkLine(self, startRow, startCol, moveRow, moveCol, numOfElem):
+    def checkLine(self, startRow: int, startCol: int, moveRow: int, moveCol: int, numOfElem: int)-> bool:
         counter = 0
         countedSymbol = self.tiles[startRow][startCol]
         for elem in range(0, numOfElem):
@@ -82,10 +130,8 @@ class Board:
 
     def undo_move(self) -> None:
         """Undoes the previous move, which coordinates are
-        deleted from list 'moves' and added to list 'undone moves'.
-        :return:
-        """
-        
+        deleted from list 'moves' and added to list 'undone moves'."""
+
         try:
             undo_coordinates: Tuple[int, int] = self.moves[-1]
         except IndexError:
@@ -102,10 +148,8 @@ class Board:
 
     def repeat_move(self) -> None:
         """Restores the last undone move, which coordinates are
-        deleted from list 'undone_moves' and added to list 'moves'.
-        :return:
-        """
-        
+        deleted from list 'undone_moves' and added to list 'moves'."""
+
         try:
             repeat_coordinates: Tuple[int, int] = self.undone_moves[-1]
         except IndexError:
@@ -128,9 +172,7 @@ class Board:
 
     def undo_all_moves(self) -> None:
         """Undoes all the moves, which coordinates are
-        deleted from list 'moves' and added to list 'undone moves'.
-        :return:
-        """
+        deleted from list 'moves' and added to list 'undone moves'."""
 
         try:
             undo_all_coordinates: Tuple[int, int] = self.moves[-1]
@@ -151,9 +193,8 @@ class Board:
 
     def repeat_all_moves(self) -> None:
         """Restores all the undone moves, which coordinates are
-        deleted from list 'undone_moves' and added to list 'moves'.
-        :return:
-        """
+        deleted from list 'undone_moves' and added to list 'moves'."""
+
         try:
             repeat_all_coordinates: Tuple[int, int] = self.undone_moves[-1]
         except IndexError:
