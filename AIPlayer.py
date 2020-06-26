@@ -26,7 +26,7 @@ class AIPlayer:
         return self.board.tiles[col][row] == self.sign
 
     def onlyOpponentTiles(self, col:int, row:int)-> bool:
-         """Checks if in given tile is not AI's sign
+        """Checks if in given tile is not AI's sign
         Parameters
         ------
         col : int
@@ -72,7 +72,7 @@ class AIPlayer:
         return (not countEmptyTiles == self.board.size) and (countTiles + countEmptyTiles == self.board.size)
 
     def makeMove(self)-> None:
-         """If there isn't any good move, it goes to function makeRandomMove
+        """If there isn't any good move, it goes to function makeRandomMove
          First checks if AI can win this round, 
          then chcecks if his opponent is about to win, 
          next it checks if there is any possibility of winning. 
