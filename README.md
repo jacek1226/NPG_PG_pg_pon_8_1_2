@@ -1,5 +1,3 @@
-# NPG_PG_pg_pon_8_1_2
-
 Temat 11: Gra w kółko i krzyżyk
 
 Funkcjonalności:
@@ -18,6 +16,4 @@ PODSUMOWANIE I WNIOSKI Z DYSKUSJI O SYSTEMACH ZARZĄDZANIA PROJEKTEM
 Mimo że Asana i Github również oferują większość tych funkcji, to jednak są dużo mniej przejrzyste (szczególnie Github), są dostępne tylko w języku angielskim. Gdyby nasz projekt był większy, składał się z większej liczby członków, a co za tym idzie – wymagał większej organizacji, to może skłonilibyśmy się w kierunku Asany, która umożliwia lepszy podgląd większej ilości zadań, a także dodawanie „podzadań” (ang. subtasks) (w Trello przewijanie dużej liczby list bywa niewygodne). Również zautomatyzowany kanban Githuba nie jest dla nas niezbędny, gdyż przy takiej liczbie zadań ręczne ich przenoszenie w niczym nie przeszkadza. Ponadto Github jest najmniej przyjaznym i intuicyjnym systemem z tych trzech omawianych. Dominująca biel jest monotonna (zdecydowanie lepszym rozwiązaniem są kolorowe oznaczenia), a cały interfejs wizualnie najmniej do nas przemawia.
 
 Podsumowując, wszystkie omówione systemy są podobnie dobre, jednak małe różnice występujące między nimi sprawiły, że za najbardziej nam odpowiadające i dostosowane do potrzeb naszego projeku uznaliśmy Trello.
-
-
 

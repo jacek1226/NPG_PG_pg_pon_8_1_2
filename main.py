@@ -13,6 +13,7 @@ GUI_COLOR='#5584B4'
 class GuiPart:
     def __init__(self, root):
         self.root=root
+        
         self.db = Database()
         self.data=self.db.readData()
         self.playerOne = tk.StringVar()
@@ -20,8 +21,7 @@ class GuiPart:
         if self.db.connection:
             self.playerOne.set(self.data[0][0])
             self.playerTwo.set(self.data[1][0])
-
-
+            
         self.GAMEHEIGHT = 7 / 8
         #defining always visible elements of GUI
         canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
@@ -66,7 +66,6 @@ class GuiPart:
         self.menuFrame.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.7)
         self.changeSize(3)
 
-
         self.AISelectionFrame = tk.Frame(self.guiFrame, bg=GUI_COLOR)
 
         EasyAIButton = tk.Button(self.AISelectionFrame, text='Tryb latwy',
@@ -80,7 +79,6 @@ class GuiPart:
         menuAIButton = tk.Button(self.AISelectionFrame, text="Powrót do menu głównego",
                                command=lambda: self.changeScreen(self.AISelectionFrame, self.selectionFrame))
         menuAIButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
-
 
     def changeScreen(self, oldScreen, newScreen):
         oldScreen.place_forget()
@@ -257,7 +255,7 @@ class GuiPart:
                     self.updateAllCellsText()
                     self.checkEndGame()
                     return
-
+                  
     def endOfGame(self, text):
         for i in range(self.size):
             for j in range(self.size):
@@ -307,6 +305,7 @@ class GuiPart:
         self.db.addUser(newName)
         self.closeStatistics()
         self.showStatistics()
+        
 root=tk.Tk()
 
 gui = GuiPart(root)
