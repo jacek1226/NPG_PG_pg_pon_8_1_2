@@ -4,6 +4,7 @@ import random as rand
 from Board import Board
 from AIPlayer import AIPlayer
 
+#defining size and color of the window
 HEIGHT= 400
 WIDTH = 400
 GUI_COLOR='#5584B4'
@@ -11,6 +12,7 @@ GUI_COLOR='#5584B4'
 class GuiPart:
     def __init__(self, root):
         self.root=root
+        #defining size of the game area
         self.GAMEHEIGHT = 7 / 8
         #defining always visible elements of GUI
         canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
@@ -19,6 +21,7 @@ class GuiPart:
         self.guiFrame = tk.Frame(root, bg=GUI_COLOR, bd=5)
         self.guiFrame.place(anchor='n', rely=0, relx=0.5, relwidth=1, relheight=1)
 
+        #placing label with title
         nameLabel = tk.Label(self.guiFrame, font=40, text='KÓŁKO I KRZYŻYK!', bg=GUI_COLOR)
         nameLabel.place(rely=0.1, relx=0, relwidth=1, relheight=0.1)
 
@@ -67,25 +70,54 @@ class GuiPart:
         menuAIButton = tk.Button(self.AISelectionFrame, text="Powrót do menu głównego",
                                command=lambda: self.changeScreen(self.AISelectionFrame, self.selectionFrame))
         menuAIButton.place(rely=0.7, relx=0.1, relwidth=0.8, relheight=0.15)
-    def changeScreen(self, oldScreen, newScreen):
+
+    def changeScreen(self, oldScreen: tk.Frame, newScreen: tk.Frame) -> None:
+        """Changes the screen.
+        Parameters
+        ----------
+        oldScreen : tk.Frame
+        The current frame, which should be changed.
+        newScreen : tk.Frame
+        The new frame, which is placed instead of oldScreen.
+        """
+
         oldScreen.place_forget()
+        #defining the location of newScreen
         newScreen.place(anchor='n', rely=0.2, relx=0.5, relwidth=1, relheight=0.8)
 
-    def changeSize(self, n):
-        self.size=n
+    def changeSize(self, n: int)-> None:
+        """Defines the size of game.
+
+        Parameters
+        ----------
+        n : int
+        Choosen size of game.
+        """
+
+        self.size: int = n
         for i in range (3):
-            self.rowButtons[i]["bg"]="white"
-        self.rowButtons[n-3]["bg"]="red"
+            self.rowButtons[i]["bg"] = "white"
+        self.rowButtons[n-3]["bg"] = "red"
 
-    def newGame(self,withAI: bool,AIType="easy"):
+    def newGame(self, withAI: bool, AIType: str = "easy")-> None:
+        """Defines the appearance and acting of game board.
+        Parameters
+        ----------
+        withAI : bool
+        Defines if the player chose playing with computer.
+        AIType : str
+        Defines what mode (easy/hard) player chose.
+        """
 
-        self.withAI: bool=withAI
-        self.AIType=AIType
-        self.gameFrame=tk.Frame(self.guiFrame,bg=GUI_COLOR)
+        self.withAI: bool = withAI
+        self.AIType: str = AIType
+        self.gameFrame = tk.Frame(self.guiFrame,bg=GUI_COLOR)
         self.board = Board(self.size)
+
         if withAI:
             self.AIPlayer = AIPlayer(self.board)
 
+        #defining game board and activating game buttons
         self.gameButtons = list(map(lambda y: list(map(lambda x: tk.Button(self.gameFrame,
                                             command=lambda: self.gameButtonClicked(y,x)), range(self.size))), range(self.size)))
         for i in range(self.size):
@@ -111,18 +143,39 @@ class GuiPart:
 
         self.changeScreen(self.selectionFrame, self.gameFrame)
 
-    def updateAllCellsText(self):
-        for row in range(self.size):
-            for col in range(self.size):
-                self.updateCellText(row,col)
 
-    def updateCellText(self,row,col):
+    def updateCellText(self, row: int ,col: int)-> None:
+        """Updates empty tile marked with " . ". Converting from TUI to GUI.
+
+            Parameters
+            ----------
+            row : int
+            Row in which is placed the cell that will be updated.
+            col : int
+            Column in which is placed the cell that will be updated.
+            """
+
         if self.board.getValue(row, col) == '.':
             self.gameButtons[row][col]["text"] = ""
         else:
             self.gameButtons[row][col]["text"] = self.board.getValue(row, col)
 
-    def checkEndGame(self):
+    def updateAllCellsText(self)-> None:
+        """Updates all empty tiles marked with " . ". Converting from TUI to GUI."""
+
+        for row in range(self.size):
+            for col in range(self.size):
+                self.updateCellText(row, col)
+
+    def checkEndGame(self)-> bool:
+        """Defines feedback at the end of the game.
+
+        Returns
+        -------
+        bool
+            true if the game has ended or false if it still goes
+        """
+
         if self.board.checkIfWin():
             self.stopTimer()
             self.board.swapPlayer()
@@ -135,9 +188,20 @@ class GuiPart:
             return True
         return False
 
-    def gameButtonClicked(self, row, col):
+    def gameButtonClicked(self, row: int, col: int)-> None:
+        """Defines the behaviour of game buttons (board cells). Calls the right functions
+        both in case of playing with computer and with another player.
+
+        Parameters
+        ----------
+        row : int
+        Row in which is placed the cell that is clicked.
+        col : int
+        Column in which is placed the cell that is clicked.
+        """
+
         if self.board.changeTile(row, col):
-            self.updateCellText(row,col)
+            self.updateCellText(row, col)
             if self.checkEndGame():
                 return
 
@@ -155,7 +219,15 @@ class GuiPart:
 
 
 
-    def endOfGame(self, text):
+    def endOfGame(self, text: str)-> None:
+        """Deactivates all the cells buttons and displays "end of the game' screen.
+
+        Parameters
+        ----------
+        text : str
+        Feedback displayed after the game is finished (who won or if there was a draw).
+        """
+
         for i in range(self.size):
             for j in range(self.size):
                 self.gameButtons[i][j].config(command=lambda: None)
@@ -165,31 +237,31 @@ class GuiPart:
 
     def backToMenu(self)-> None:
         """Deletes the timer label."""
-        
+
         self.changeScreen(self.gameFrame, self.menuFrame)
         self.gameFrame.destroy()
         self.timer.destroy()
 
     def StartTimer(self)-> None:
         """Starts counting time and places the label with timer."""
-        
+
         self._start: float = 0.0
         self._time_passed: float = 0.0
         self._running: bool = 0
         self.time_str = tk.StringVar()
-        
+
         #placing the label with timer
         self.timer = tk.Label(self.guiFrame, textvariable=self.time_str, bg = GUI_COLOR, font = (20))
         self.setTime(self._time_passed)
         self.timer.pack()
-        
+
         #updating the timer
         if not self._running:
             self._start = time.time() - self._time_passed
             self.timeUpdate()
             self._running = 1
 
-    def setTime(self, passed)-> None:
+    def setTime(self, passed: float)-> None:
         """Converts the time from seconds to minutes:seconds:centyseconds format.
 
         Parameters
@@ -213,7 +285,7 @@ class GuiPart:
 
     def stopTimer(self)-> None:
         """Stops the timer."""
-        
+
         if self._running:
             root.after_cancel(self._timer)
             self._running = 0
